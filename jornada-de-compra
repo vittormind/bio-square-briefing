@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loop — Gestão em Jornada de Compra</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #2ECC71;
+    --green-dim: rgba(46,204,113,0.08);
+    --green-border: rgba(46,204,113,0.22);
+    --bg: #070707;
+    --text: #ffffff;
+    --muted: #555555;
+    --body: #999999;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── GRAIN TEXTURE overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* ── RADIAL GLOW top ── */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(46,204,113,0.055) 0%, transparent 68%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── WRAPPER ── */
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 26px 80px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 0 0;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 5px;
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .logo-inf {
+    display: inline-block;
+    animation: spin 10s linear infinite;
+    font-size: 16px;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  .top-tag {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,0.07);
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 64px 0 48px;
+    gap: 0;
+  }
+
+  /* ── BLOCO 1: headline principal ── */
+  .block-1 {
+    margin-bottom: 56px;
+    opacity: 0;
+    transform: translateY(24px);
+    animation: rise 0.9s cubic-bezier(0.22,1,0.36,1) 0.2s forwards;
+  }
+
+  .eyebrow {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--green);
+    opacity: 0.5;
+  }
+
+  .headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(44px, 11vw, 64px);
+    line-height: 0.92;
+    letter-spacing: 1.5px;
+    margin-bottom: 22px;
+  }
+
+  .headline .accent { color: var(--green); }
+
+  .headline .thin {
+    font-family: 'DM Sans', sans-serif;
+    font-size: clamp(16px, 4.5vw, 22px);
+    font-weight: 300;
+    font-style: italic;
+    letter-spacing: 0;
+    line-height: 1.5;
+    color: var(--body);
+    display: block;
+    margin-top: 14px;
+  }
+
+  /* ── BLOCO 2: frase 2 ── */
+  .block-2 {
+    margin-bottom: 48px;
+    padding-left: 18px;
+    border-left: 1px solid var(--green-border);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: rise 0.9s cubic-bezier(0.22,1,0.36,1) 0.45s forwards;
+  }
+
+  .block-2 p {
+    font-size: clamp(14px, 3.8vw, 17px);
+    font-weight: 400;
+    line-height: 1.65;
+    color: var(--body);
+  }
+
+  .block-2 p strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* ── BLOCO 3: frase 3 — destaque grande ── */
+  .block-3 {
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: rise 0.9s cubic-bezier(0.22,1,0.36,1) 0.65s forwards;
+  }
+
+  .block-3 .label-small {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .block-3 p {
+    font-size: clamp(15px, 4vw, 19px);
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--body);
+  }
+
+  .block-3 p em {
+    font-style: normal;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* ── BLOCO 4: frase impacto final ── */
+  .block-4 {
+    margin-bottom: 56px;
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    border-left: 3px solid var(--green);
+    border-radius: 0 4px 4px 0;
+    padding: 20px 22px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: rise 0.9s cubic-bezier(0.22,1,0.36,1) 0.85s forwards;
+  }
+
+  .block-4 p {
+    font-size: clamp(13px, 3.6vw, 15px);
+    font-weight: 400;
+    line-height: 1.75;
+    color: #aaaaaa;
+  }
+
+  .block-4 p strong {
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  /* ── CTA ── */
+  .cta-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: rise 0.9s cubic-bezier(0.22,1,0.36,1) 1.05s forwards;
+  }
+
+  .cta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--green);
+    color: #000;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 18px 28px;
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .cta-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.08);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .cta-btn:hover::before { opacity: 1; }
+
+  .cta-btn:hover {
+    box-shadow: 0 0 32px rgba(46,204,113,0.35);
+    transform: translateY(-1px);
+  }
+
+  .cta-btn:active {
+    transform: translateY(1px);
+    box-shadow: none;
+  }
+
+  .cta-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  .cta-hint {
+    text-align: center;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.06), transparent);
+    margin: 56px 0 0;
+  }
+
+  /* ── FOOTER ── */
+  .foot {
+    padding-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .foot p {
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .foot .accent { color: var(--green); }
+
+  /* ── VERTICAL LINE decorativa ── */
+  .v-line {
+    position: fixed;
+    left: 18px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom,
+      transparent 0%,
+      rgba(46,204,113,0.12) 20%,
+      rgba(46,204,113,0.12) 80%,
+      transparent 100%);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (min-width: 480px) {
+    .page { padding: 0 32px 80px; }
+  }
+
+  /* ── PULSE no botão ── */
+  @keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(46,204,113,0.35); }
+    70%  { box-shadow: 0 0 0 12px rgba(46,204,113,0); }
+    100% { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+  }
+
+  .cta-btn {
+    animation: pulse-ring 2.8s ease 2.5s infinite;
+  }
+
+  .cta-btn:hover {
+    animation: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="v-line"></div>
+
+<div class="page">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="logo">
+      <span class="logo-inf">∞</span>
+      LOOP
+    </div>
+    <span class="top-tag">Gestão em Jornada de Compra</span>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- BLOCO 1 -->
+    <div class="block-1">
+      <p class="eyebrow">Diagnóstico</p>
+      <h1 class="headline">
+        EXISTE UMA<br>
+        <span class="accent">VAZÃO</span><br>
+        NO SEU CAIXA.
+        <span class="thin">Essa vazão nasce da falta de clareza<br>do seu processo de compra.</span>
+      </h1>
+    </div>
+
+    <!-- BLOCO 2 -->
+    <div class="block-2">
+      <p>Não adianta saber de onde o lead veio, se <strong>ninguém sabe onde ele trava antes da compra.</strong></p>
+    </div>
+
+    <!-- BLOCO 3 -->
+    <div class="block-3">
+      <p class="label-small">O que realmente decide</p>
+      <p>O marketing leva o cliente até a porta. Mas a jornada de compra é quem decide se ele <em>entra, compra, volta e indica.</em></p>
+    </div>
+
+    <!-- BLOCO 4 -->
+    <div class="block-4">
+      <p>O problema não é só perder uma venda. É perder <strong>tudo que aquele lead poderia gerar depois dela.</strong></p>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-wrap">
+      <a
+        class="cta-btn"
+        href="https://wa.me/5515981701358?text=Ol%C3%A1%2C+vi+o+material+sobre+vaz%C3%A3o+na+jornada+de+compra+e+quero+entender+onde+isso+pode+estar+acontecendo+na+minha+opera%C3%A7%C3%A3o."
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <!-- WhatsApp icon inline -->
+        <svg class="cta-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        Descobrir onde a receita está vazando
+      </a>
+      <p class="cta-hint">Conversa rápida, sem compromisso</p>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="divider"></div>
+  <div class="foot">
+    <p><span class="accent">∞</span> Loop — Itapetininga, SP</p>
+    <p>Jornada de compra</p>
+  </div>
+
+</div>
+
+</body>
+</html>
